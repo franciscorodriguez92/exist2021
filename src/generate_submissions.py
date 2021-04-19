@@ -12,8 +12,8 @@ parser.add_argument('--model_path', type = str, default = '../models/bert_test.p
 parser.add_argument('--test_path', type = str, default = '../data/input/EXIST2021_dataset-test/EXIST2021_dataset/test/EXIST2021_test.tsv', help = 'train_path')
 parser.add_argument('--output_path', type = str, default = '../submissions/submission.tsv', help = 'output path for submission file')
 parser.add_argument('--task', type = str, default = '1', help = 'task (1, 2 or multitask)')
-parser.add_argument('--batch_size', type = int, default = 2, help = 'batch-size (default: 2)')
-parser.add_argument('--sample', action = 'store_true', default = True, help = 'get a sample of 1 percent')
+parser.add_argument('--batch_size', type = int, default = 16, help = 'batch-size (default: 16)')
+parser.add_argument('--sample', action = 'store_true', default = False, help = 'get a sample of 1 percent')
 parser.add_argument('--no_cuda', action = 'store_true',   default = False,        help = 'disables CUDA training')
 parser.add_argument('--seed', type = int, default = 123, help = 'random seed (default: 123)')
 
