@@ -1,0 +1,26 @@
+# vscode
+src/.vscode/*
+src/!.vscode/settings.json
+src/!.vscode/tasks.json
+src/!.vscode/launch.json
+src/!.vscode/extensions.json
+src/*.code-workspace
+# Local History for Visual Studio Code
+.history/
+
+# data
+data/input/*
+data/input-test/*
+data/output/*
+
+# src
+src/get_data.py
+src/requirements_original.txt
+src/.ipynb_checkpoints/*
+src/__pycache__/*
+src/exist2021_uned/*
+src/transformer/__pycache__/*
+
+# models test
+/models/bert_test.pt
+/models/bert_test_multi.pt
