@@ -12,7 +12,7 @@ import unidecode
 from nltk.stem import SnowballStemmer
 from sklearn.utils import resample
 from sklearn.decomposition import PCA
-from preprocess import TextCleaner
+from ml.preprocess import TextCleaner
 import itertools
 
 

@@ -2,17 +2,17 @@
 #%% imports
 import pandas as pd
 import os
-import utils as utils
-import classifier as clf
+import ml.utils as utils
+import ml.classifier as clf
 import numpy as np
 import random
 
 from sklearn.pipeline import Pipeline, FeatureUnion, make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.model_selection import cross_val_score, GridSearchCV, cross_validate, cross_val_predict
-from preprocess import TextCleaner
-from preprocess import ColumnSelector
-from preprocess import TypeSelector
+from ml.preprocess import TextCleaner
+from ml.preprocess import ColumnSelector
+from ml.preprocess import TypeSelector
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import confusion_matrix
@@ -25,8 +25,11 @@ np.random.seed(seed)
 random.seed(seed)
 
 #%% Inputs
-language = "es"
-task = "task1"
+train_path = '../data/input/EXIST2021_dataset-test/EXIST2021_dataset/training/EXIST2021_training_split.tsv'
+val_path = '../data/input/EXIST2021_dataset-test/EXIST2021_dataset/validation/EXIST2021_validation_split.tsv'
+language = "both"
+sample = False
+task = "task2"
 classifier = 'svm'
 features = ['text']
 #use_lexicon = 'polar'
@@ -45,14 +48,68 @@ features = ['text']
 
 # exclude_extra_features = False
 
+
+#%%
+def read_file(filename, language, sample, concat_metwo=False, text_cleaner=False):
+	df = pd.read_table(filename, sep="\t", dtype={'id': 'str'})
+	#df = pd.read_table(filename, sep="\t")
+	if language == "es":
+		df = df[df['language'] == "es"]
+	elif language == "en":
+		df = df[df['language'] == "en"]
+	
+	if concat_metwo:
+		path = '../data/input/metwo/'
+		labels = pd.read_table(path + 'corpus_machismo_etiquetas.csv', sep=";", dtype={'status_id': 'str'})
+		labels = labels[["status_id","categoria"]]
+		tweets_fields = pd.read_csv(path + 'corpus_machismo_frodriguez_atributos_extra.csv', 
+									dtype={'status_id': 'str'})
+		tweets_fields = tweets_fields[['status_id','text']]
+		metwo = tweets_fields.merge(labels, on = 'status_id', how = 'inner')
+		metwo = metwo[metwo['categoria']!='DUDOSO']
+		# test_case	id	source	language	text	task1	task2
+		#df.rename(columns={'oldName1': 'newName1', 'oldName2': 'newName2'}, inplace=True)
+		metwo['test_case']='EXIST2021'
+		metwo['id']=metwo['status_id']
+		metwo['source']='twitter'
+		metwo['language']='es'
+		metwo['task1']=metwo['categoria'].map({'NO_MACHISTA' : 'non-sexist', 'MACHISTA': 'sexist'})
+		metwo['task2']=-1
+		metwo=metwo[['test_case', 'id', 'source', 'language', 'text', 'task1', 'task2']]
+		df = df.append(metwo, ignore_index = True)
+
+	if sample:
+		df=df.sample(frac=0.01, random_state=123)
+	
+	if text_cleaner:
+		preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
+                       filter_urls=True, convert_hastags=True, lowercase=True, 
+                       replace_exclamation=True, replace_interrogation=True, 
+                       remove_accents=True, remove_punctuation=True)
+		df['text'] = df['text'].apply(lambda row: preprocessor(row))
+	return df
+
+
+#%%
+
+if language=="both":
+    df_train_es = read_file(train_path, "es", sample)
+    df_val_es = read_file(val_path, "es", sample)
+    df_train_en = read_file(train_path, "en", sample)
+    df_val_en = read_file(val_path, "en", sample)
+else:
+    df_train = read_file(train_path, language, sample)
+    df_val = read_file(val_path, language, sample)
+
 #%% Read files
 #path = os.getcwd()
-metwo2 = pd.read_table('../data/input/MeTwo2.tsv', sep="\t", 
-                       dtype={'id': 'str'})
-if language == "es":
-    tweets_labeled = metwo2[metwo2['language'] == "es"]
-elif language == "en":
-    tweets_labeled = metwo2[metwo2['language'] == "en"]
+
+# metwo2 = pd.read_table('../data/input/MeTwo2.tsv', sep="\t", 
+#                        dtype={'id': 'str'})
+# if language == "es":
+#     tweets_labeled = metwo2[metwo2['language'] == "es"]
+# elif language == "en":
+#     tweets_labeled = metwo2[metwo2['language'] == "en"]
 
 
 #%%
@@ -208,10 +265,10 @@ elif language == "en":
 #classifier_pipeline.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
 
 #%% Pipeline para baseline    
-preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
-                           filter_urls=True, convert_hastags=True, lowercase=True, 
-                           replace_exclamation=True, replace_interrogation=True, 
-                           remove_accents=True, remove_punctuation=True, replace_emojis=False)
+# preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
+#                            filter_urls=True, convert_hastags=True, lowercase=True, 
+#                            replace_exclamation=True, replace_interrogation=True, 
+#                            remove_accents=True, remove_punctuation=True, replace_emojis=False)
     
 text_pipeline = Pipeline([
     ('column_selection', ColumnSelector('text')),
@@ -227,7 +284,10 @@ text_pipeline = Pipeline([
 baseline_pipeline = Pipeline([('text_pipeline', text_pipeline),
                           ('clf', clf.get_classifier(classifier))
                           ])
-    
+
+baseline_pipeline_en = Pipeline([('text_pipeline', text_pipeline),
+                          ('clf', clf.get_classifier(classifier))
+                          ])
 #%% Cross validation baseline
 # =============================================================================
 # print(cross_val_score(baseline_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = 1))
@@ -274,7 +334,8 @@ baseline_pipeline = Pipeline([('text_pipeline', text_pipeline),
 # print(end - start)
 # 
 # =============================================================================
-    
+
+
 #%% Método de evaluación 2: Cross Validation con parámetros por defecto
 import time
 start = time.time()
@@ -294,17 +355,35 @@ scoring = {'acc': 'accuracy',
 # print('RECALL::: ', np.mean(test_score_cv['test_recall']))
 # print('PRECISION::: ', np.mean(test_score_cv['test_precision']))
 
-y_pred = cross_val_predict(baseline_pipeline, tweets_labeled[features], 
-                               tweets_labeled[task], cv=10, n_jobs = -1)
-unique_label = np.unique(tweets_labeled[task])
+# y_pred = cross_val_predict(baseline_pipeline, tweets_labeled[features], 
+#                                tweets_labeled[task], cv=10, n_jobs = -1)
+if language != "both":
+    baseline_pipeline.fit(df_train[features], df_train[task])
+    y_pred = baseline_pipeline.predict(df_val[features])
 
-print("Classification report:::")
-print(classification_report(tweets_labeled[task], y_pred, target_names=unique_label))
+    unique_label = np.unique(df_train[task])
 
-print("Confusion matrix:::")
-confusion_matrix = pd.DataFrame(confusion_matrix(tweets_labeled[task], y_pred, labels=unique_label), index=['true:{:}'.format(x) for x in unique_label], columns=['pred:{:}'.format(x) for x in unique_label])
-print(confusion_matrix)
-confusion_matrix.to_csv('../data/output/confusion_matrix.csv', encoding='utf-8')
+    print("Classification report:::")
+    print(classification_report(df_val[task], y_pred, target_names=unique_label))
+
+else:
+    baseline_pipeline.fit(df_train_es[features], df_train_es[task])
+    y_pred_es = baseline_pipeline.predict(df_val_es[features])
+    baseline_pipeline_en.fit(df_train_en[features], df_train_en[task])
+    y_pred_en = baseline_pipeline_en.predict(df_val_en[features])
+
+    unique_label = np.unique(df_train_es[task])
+
+    print("Classification report:::")
+    print(classification_report(
+        pd.concat([df_val_es[task], df_val_en[task]]), 
+        np.concatenate((y_pred_es, y_pred_en), axis=None), target_names=unique_label))
+
+
+# print("Confusion matrix:::")
+# confusion_matrix = pd.DataFrame(confusion_matrix(tweets_labeled[task], y_pred, labels=unique_label), index=['true:{:}'.format(x) for x in unique_label], columns=['pred:{:}'.format(x) for x in unique_label])
+# print(confusion_matrix)
+# confusion_matrix.to_csv('../data/output/confusion_matrix.csv', encoding='utf-8')
 #tweets_labeled = tweets_labeled.assign(y_pred=pd.Series(y_pred).values)
 #tweets_labeled.to_csv('corpus_y_pred.csv', sep = ';', encoding='utf-8')
 end = time.time()

@@ -20,6 +20,7 @@ src/.ipynb_checkpoints/*
 src/__pycache__/*
 src/exist2021_uned/*
 src/transformer/__pycache__/*
+src/ml/__pycache__/*
 
 # models test
 /models/bert_test.pt
