@@ -16,6 +16,45 @@ from ml.preprocess import TextCleaner
 import itertools
 
 
+def read_file(filename, language, sample, concat_metwo=False, text_cleaner=False):
+	df = pd.read_table(filename, sep="\t", dtype={'id': 'str'})
+	#df = pd.read_table(filename, sep="\t")
+	if language == "es":
+		df = df[df['language'] == "es"]
+	elif language == "en":
+		df = df[df['language'] == "en"]
+	
+	if concat_metwo:
+		path = '../data/input/metwo/'
+		labels = pd.read_table(path + 'corpus_machismo_etiquetas.csv', sep=";", dtype={'status_id': 'str'})
+		labels = labels[["status_id","categoria"]]
+		tweets_fields = pd.read_csv(path + 'corpus_machismo_frodriguez_atributos_extra.csv', 
+									dtype={'status_id': 'str'})
+		tweets_fields = tweets_fields[['status_id','text']]
+		metwo = tweets_fields.merge(labels, on = 'status_id', how = 'inner')
+		metwo = metwo[metwo['categoria']!='DUDOSO']
+		# test_case	id	source	language	text	task1	task2
+		#df.rename(columns={'oldName1': 'newName1', 'oldName2': 'newName2'}, inplace=True)
+		metwo['test_case']='EXIST2021'
+		metwo['id']=metwo['status_id']
+		metwo['source']='twitter'
+		metwo['language']='es'
+		metwo['task1']=metwo['categoria'].map({'NO_MACHISTA' : 'non-sexist', 'MACHISTA': 'sexist'})
+		metwo['task2']=-1
+		metwo=metwo[['test_case', 'id', 'source', 'language', 'text', 'task1', 'task2']]
+		df = df.append(metwo, ignore_index = True)
+
+	if sample:
+		df=df.sample(frac=0.01, random_state=123)
+	
+	if text_cleaner:
+		preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
+                       filter_urls=True, convert_hastags=True, lowercase=True, 
+                       replace_exclamation=True, replace_interrogation=True, 
+                       remove_accents=True, remove_punctuation=True)
+		df['text'] = df['text'].apply(lambda row: preprocessor(row))
+	return df
+
 def to_lower_endline(text):
     return text.lower().replace('\n',' ')
 

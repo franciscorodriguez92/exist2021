@@ -6,6 +6,7 @@ import ml.utils as utils
 import ml.classifier as clf
 import numpy as np
 import random
+import joblib
 
 from sklearn.pipeline import Pipeline, FeatureUnion, make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
@@ -28,10 +29,14 @@ random.seed(seed)
 train_path = '../data/input/EXIST2021_dataset-test/EXIST2021_dataset/training/EXIST2021_training_split.tsv'
 val_path = '../data/input/EXIST2021_dataset-test/EXIST2021_dataset/validation/EXIST2021_validation_split.tsv'
 language = "both"
+text_cleaner = False
 sample = False
 task = "task2"
 classifier = 'svm'
 features = ['text']
+model_path = '../models/ml_test.pkl'
+if language == "both":
+    model_path_english = model_path.replace('.pkl', '')+'_english.pkl' 
 #use_lexicon = 'polar'
 # use_lexicon = 'metwo'
 # #use_lexicon = 'hurtlex'
@@ -49,57 +54,17 @@ features = ['text']
 # exclude_extra_features = False
 
 
-#%%
-def read_file(filename, language, sample, concat_metwo=False, text_cleaner=False):
-	df = pd.read_table(filename, sep="\t", dtype={'id': 'str'})
-	#df = pd.read_table(filename, sep="\t")
-	if language == "es":
-		df = df[df['language'] == "es"]
-	elif language == "en":
-		df = df[df['language'] == "en"]
-	
-	if concat_metwo:
-		path = '../data/input/metwo/'
-		labels = pd.read_table(path + 'corpus_machismo_etiquetas.csv', sep=";", dtype={'status_id': 'str'})
-		labels = labels[["status_id","categoria"]]
-		tweets_fields = pd.read_csv(path + 'corpus_machismo_frodriguez_atributos_extra.csv', 
-									dtype={'status_id': 'str'})
-		tweets_fields = tweets_fields[['status_id','text']]
-		metwo = tweets_fields.merge(labels, on = 'status_id', how = 'inner')
-		metwo = metwo[metwo['categoria']!='DUDOSO']
-		# test_case	id	source	language	text	task1	task2
-		#df.rename(columns={'oldName1': 'newName1', 'oldName2': 'newName2'}, inplace=True)
-		metwo['test_case']='EXIST2021'
-		metwo['id']=metwo['status_id']
-		metwo['source']='twitter'
-		metwo['language']='es'
-		metwo['task1']=metwo['categoria'].map({'NO_MACHISTA' : 'non-sexist', 'MACHISTA': 'sexist'})
-		metwo['task2']=-1
-		metwo=metwo[['test_case', 'id', 'source', 'language', 'text', 'task1', 'task2']]
-		df = df.append(metwo, ignore_index = True)
-
-	if sample:
-		df=df.sample(frac=0.01, random_state=123)
-	
-	if text_cleaner:
-		preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
-                       filter_urls=True, convert_hastags=True, lowercase=True, 
-                       replace_exclamation=True, replace_interrogation=True, 
-                       remove_accents=True, remove_punctuation=True)
-		df['text'] = df['text'].apply(lambda row: preprocessor(row))
-	return df
-
 
 #%%
 
 if language=="both":
-    df_train_es = read_file(train_path, "es", sample)
-    df_val_es = read_file(val_path, "es", sample)
-    df_train_en = read_file(train_path, "en", sample)
-    df_val_en = read_file(val_path, "en", sample)
+    df_train_es = utils.read_file(train_path, "es", sample, text_cleaner)
+    df_val_es = utils.read_file(val_path, "es", sample, text_cleaner)
+    df_train_en = utils.read_file(train_path, "en", sample, text_cleaner)
+    df_val_en = utils.read_file(val_path, "en", sample, text_cleaner)
 else:
-    df_train = read_file(train_path, language, sample)
-    df_val = read_file(val_path, language, sample)
+    df_train = utils.read_file(train_path, language, sample, text_cleaner)
+    df_val = utils.read_file(val_path, language, sample, text_cleaner)
 
 #%% Read files
 #path = os.getcwd()
@@ -365,6 +330,8 @@ if language != "both":
 
     print("Classification report:::")
     print(classification_report(df_val[task], y_pred, target_names=unique_label))
+    print(f'Saving model at {model_path}')
+    joblib.dump(baseline_pipeline, model_path)
 
 else:
     baseline_pipeline.fit(df_train_es[features], df_train_es[task])
@@ -378,6 +345,10 @@ else:
     print(classification_report(
         pd.concat([df_val_es[task], df_val_en[task]]), 
         np.concatenate((y_pred_es, y_pred_en), axis=None), target_names=unique_label))
+    print(f'Saving model at {model_path}')
+    joblib.dump(baseline_pipeline, model_path)
+    print(f'Saving model at {model_path_english}')
+    joblib.dump(baseline_pipeline_en, model_path_english)
 
 
 # print("Confusion matrix:::")
@@ -388,6 +359,7 @@ else:
 #tweets_labeled.to_csv('corpus_y_pred.csv', sep = ';', encoding='utf-8')
 end = time.time()
 print("Process time:", (end - start)/60, "minutes")
+
 #%% Método de evaluación: 
 #1. Hacer 10 repartos diferentes y aleatorios de training y test (70/30) -> ShuffleSplit
 #2. Para cada reparto, 
