@@ -9,7 +9,19 @@ import sys
 import re
 import unidecode
 import string
+from sklearn.utils import resample
 
+
+def downsample(df, clase, n):
+    df_majority = df[df.categoria==clase]
+    df_minority = df[df.categoria!=clase]
+    df_majority_downsampled = resample(df_majority, 
+                                 replace=False,
+                                 n_samples=n,
+                                 random_state=123)
+    df_downsampled = pd.concat([df_majority_downsampled, df_minority])
+    df_downsampled = df_downsampled.sample(frac=1, random_state = 123).reset_index(drop=True)
+    return(df_downsampled)
 
 class TextCleaner(object):
 
@@ -95,7 +107,7 @@ class exist_2021(torch.utils.data.Dataset):
 	        : (for evaluation on the leaderboard)
 	'''
 
-	def __init__(self, filename, basenet= 'bert', max_length= 128, stop_words= False, is_test= False, language=False, sample=False, concat_metwo=False, text_cleaner=False):
+	def __init__(self, filename, basenet= 'bert', max_length= 128, stop_words= False, is_test= False, language=False, sample=False, concat_metwo=False, text_cleaner=False, balance_metwo=False):
 		super(exist_2021, self).__init__()
 
 		self.is_test = is_test
@@ -105,7 +117,7 @@ class exist_2021(torch.utils.data.Dataset):
 			#TODO: preprocesado
 			pass
 
-		self.data    = self.read_file(filename, stop_words, language, sample, concat_metwo, text_cleaner)
+		self.data    = self.read_file(filename, stop_words, language, sample, concat_metwo, text_cleaner, balance_metwo)
 
 		if basenet == 'bert':
 			print("Tokenizer: bert-base-multilingual-cased\n")
@@ -127,7 +139,7 @@ class exist_2021(torch.utils.data.Dataset):
 		#self.segment_id = torch.tensor([1] * self.max_length).view(1, -1)
 
 		
-	def read_file(self, filename, stop_words, language, sample, concat_metwo, text_cleaner):
+	def read_file(self, filename, stop_words, language, sample, concat_metwo, text_cleaner, balance_metwo):
 		#df = pd.read_table(filename, sep="\t", dtype={'id': 'str'})
 		df = pd.read_table(filename, sep="\t")
 		if language == "es":
@@ -148,6 +160,9 @@ class exist_2021(torch.utils.data.Dataset):
 			tweets_fields = tweets_fields[['status_id','text']]
 			metwo = tweets_fields.merge(labels, on = 'status_id', how = 'inner')
 			metwo = metwo[metwo['categoria']!='DUDOSO']
+			if balance_metwo:
+				a = dict(metwo['categoria'].value_counts())
+				metwo = downsample(metwo, 'NO_MACHISTA', a['MACHISTA'])
 			# test_case	id	source	language	text	task1	task2
 			#df.rename(columns={'oldName1': 'newName1', 'oldName2': 'newName2'}, inplace=True)
 			metwo['test_case']='EXIST2021'

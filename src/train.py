@@ -18,6 +18,7 @@ parser.add_argument('--val_path', type = str, default = '../data/input/EXIST2021
 parser.add_argument('--sample', action = 'store_true', default = False, help = 'get a sample of 1 percent')
 parser.add_argument('--batch_size', type = int, default = 16, help = 'training batch-size (default: 16)')
 parser.add_argument('--concat_metwo_train', action = 'store_true', default = False, help = 'append metwo dataset to training (task1)')
+parser.add_argument('--balance_metwo', action = 'store_true', default = False, help = 'balance metwo when appending to training (task1)')
 parser.add_argument('--text_cleaner', action = 'store_true', default = False, help = 'preprocess text')
 parser.add_argument('--no_cuda', action = 'store_true',   default = False,        help = 'disables CUDA training')
 parser.add_argument('--seed', type = int, default = 123, help = 'random seed (default: 123)')
@@ -58,10 +59,12 @@ learning_rate = args.lr
 
 model_path=args.model_path
 
+balance_metwo = args.balance_metwo
 #%% 
 train_loader = DataLoader(
     dataset=datasets.exist_2021(train_path, 
-    sample = sample, basenet = basenet, concat_metwo=concat_metwo_train, text_cleaner=text_cleaner), 
+    sample = sample, basenet = basenet, 
+    concat_metwo=concat_metwo_train, text_cleaner=text_cleaner, balance_metwo=balance_metwo), 
     batch_size=batch_size, shuffle=True)
 
 validation_loader = DataLoader(
