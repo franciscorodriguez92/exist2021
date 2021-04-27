@@ -69,7 +69,7 @@ train_loader = DataLoader(
 
 validation_loader = DataLoader(
     dataset=datasets.exist_2021(val_path, 
-    sample = sample, basenet = basenet), 
+    sample = sample, basenet = basenet, text_cleaner=text_cleaner), 
     batch_size=batch_size, shuffle=True)
 
 #%%

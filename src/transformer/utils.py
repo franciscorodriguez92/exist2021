@@ -68,8 +68,8 @@ def get_result_test(model, dataloader, device, task):
         #print("TRUE_LABELS::::::: ", true_labels)
         #print("PREDICTIONS:::::: ", (predictions))
 
-def generate_submission(model_path, basenet, device, test_path=None, output_path=None, task=1, batch_size=2, sample=True):
-    dataset = datasets.exist_2021(test_path, sample = sample, basenet = basenet, is_test = True)
+def generate_submission(model_path, basenet, device, test_path=None, output_path=None, task=1, batch_size=2, sample=True, text_cleaner=False):
+    dataset = datasets.exist_2021(test_path, sample = sample, basenet = basenet, is_test = True, text_cleaner=text_cleaner)
     test_data_loader = DataLoader(
         dataset=dataset,
         shuffle=False,

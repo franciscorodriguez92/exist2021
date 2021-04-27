@@ -16,6 +16,8 @@ parser.add_argument('--batch_size', type = int, default = 16, help = 'batch-size
 parser.add_argument('--sample', action = 'store_true', default = False, help = 'get a sample of 1 percent')
 parser.add_argument('--no_cuda', action = 'store_true',   default = False,        help = 'disables CUDA training')
 parser.add_argument('--seed', type = int, default = 123, help = 'random seed (default: 123)')
+parser.add_argument('--text_cleaner', action = 'store_true', default = False, help = 'preprocess text')
+
 
 args = parser.parse_args()
 
@@ -29,6 +31,7 @@ batch_size = args.batch_size
 sample = args.sample
 args_cuda = args.no_cuda
 args_seed = args.seed
+text_cleaner = args.text_cleaner
 
 if args.task=='1':
     task=1
@@ -49,4 +52,4 @@ print("\nDevice: " + str(device) +"; Seed: "+str(args_seed))
 
 #%%
 generate_submission(
-    model_path, basenet, device, test_path, output_path, task, batch_size, sample)    
+    model_path, basenet, device, test_path, output_path, task, batch_size, sample, text_cleaner)    
