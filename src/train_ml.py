@@ -234,8 +234,15 @@ else:
 #                            filter_urls=True, convert_hastags=True, lowercase=True, 
 #                            replace_exclamation=True, replace_interrogation=True, 
 #                            remove_accents=True, remove_punctuation=True, replace_emojis=False)
-    
+
 text_pipeline = Pipeline([
+    ('column_selection', ColumnSelector('text')),
+    ('tfidf', TfidfVectorizer(tokenizer=utils.tokenizer_, 
+                                          smooth_idf=True, #preprocessor = preprocessor,
+                                          norm=None, min_df=0.01, ngram_range=(1,1)))
+])
+
+text_pipeline2 = Pipeline([
     ('column_selection', ColumnSelector('text')),
     ('tfidf', TfidfVectorizer(tokenizer=utils.tokenizer_, 
                                           smooth_idf=True, #preprocessor = preprocessor,
@@ -250,7 +257,7 @@ baseline_pipeline = Pipeline([('text_pipeline', text_pipeline),
                           ('clf', clf.get_classifier(classifier))
                           ])
 
-baseline_pipeline_en = Pipeline([('text_pipeline', text_pipeline),
+baseline_pipeline_en = Pipeline([('text_pipeline', text_pipeline2),
                           ('clf', clf.get_classifier(classifier))
                           ])
 #%% Cross validation baseline
