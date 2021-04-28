@@ -20,23 +20,41 @@ from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import TruncatedSVD
 from sklearn.metrics import classification_report
 
+import argparse
+
 ##% Seed
 seed = 123
 np.random.seed(seed)
 random.seed(seed)
 
+#%%
+
+parser = argparse.ArgumentParser(description = 'EXIST 2021 ML')
+
+parser.add_argument('--train_path', type = str, default = '../data/input/EXIST2021_dataset-test/EXIST2021_dataset/training/EXIST2021_training_split.tsv', help = 'train_path')
+parser.add_argument('--val_path', type = str, default = '../data/input/EXIST2021_dataset-test/EXIST2021_dataset/validation/EXIST2021_validation_split.tsv', help = 'val_path')
+parser.add_argument('--task', type = str, default = 'task1', help = 'task (task1 or task2)')
+parser.add_argument('--language', type = str, default = "both", help = 'language (es, en or both)')
+parser.add_argument('--text_cleaner', action = 'store_true', default = False, help = 'preprocess text')
+parser.add_argument('--sample', action = 'store_true', default = False, help = 'get a sample of 1 percent')
+parser.add_argument('--classifier', type = str, default = 'svm', help = 'svm, random_forest or logistic_regression')
+parser.add_argument('--model_path', type = str, default = '../models/ml_test.pkl', help = 'path to save trained model (e.g. ../models/bert_test.pt)')
+
+args = parser.parse_args()
+#print(args)
 #%% Inputs
-train_path = '../data/input/EXIST2021_dataset-test/EXIST2021_dataset/training/EXIST2021_training_split.tsv'
-val_path = '../data/input/EXIST2021_dataset-test/EXIST2021_dataset/validation/EXIST2021_validation_split.tsv'
-language = "both"
-text_cleaner = False
-sample = False
-task = "task2"
-classifier = 'svm'
+train_path = args.train_path
+val_path = args.val_path
+sample = args.sample
+language = args.language
+text_cleaner = args.text_cleaner
+task = args.task
+classifier = args.classifier
 features = ['text']
-model_path = '../models/ml_test.pkl'
+model_path=args.model_path
 if language == "both":
     model_path_english = model_path.replace('.pkl', '')+'_english.pkl' 
+
 #use_lexicon = 'polar'
 # use_lexicon = 'metwo'
 # #use_lexicon = 'hurtlex'

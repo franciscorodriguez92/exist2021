@@ -5,6 +5,7 @@ import ml.utils as utils
 import numpy as np
 import random
 import joblib
+import argparse
 
 ##% Seed
 seed = 123
@@ -12,15 +13,30 @@ np.random.seed(seed)
 random.seed(seed)
 
 #%%
-test_path = '../data/input/EXIST2021_dataset-test/EXIST2021_dataset/test/EXIST2021_test.tsv'
-language = "both"
-text_cleaner = False
-#sample = False
-task = "task2"
+
+parser = argparse.ArgumentParser(description = 'EXIST 2021 ML')
+parser.add_argument('--test_path', type = str, default = '../data/input/EXIST2021_dataset-test/EXIST2021_dataset/test/EXIST2021_test.tsv', help = 'train_path')
+parser.add_argument('--model_path', type = str, default = '../models/ml_test.pkl', help = 'path to save trained model (e.g. ../models/bert_test.pt)')
+parser.add_argument('--language', type = str, default = "both", help = 'language (es, en or both)')
+parser.add_argument('--text_cleaner', action = 'store_true', default = False, help = 'preprocess text')
+parser.add_argument('--task', type = str, default = 'task1', help = 'task (task1 or task2)')
+parser.add_argument('--output_path', type = str, default = '../submissions/submission.tsv', help = 'output path for submission file')
+parser.add_argument('--sample', action = 'store_true', default = False, help = 'get a sample of 1 percent')
+
+
+args = parser.parse_args()
+#print(args)
+#%%
+test_path = args.test_path
+language = args.language
+text_cleaner = args.text_cleaner
+sample = args.sample
+task = args.task
 #classifier = 'svm'
 features = ['text']
-model_path = '../models/ml_test.pkl'
-output_path = '../submissions/submission.tsv'
+model_path=args.model_path
+output_path = args.output_path
+
 if language == "both":
     model_path_en = model_path.replace('.pkl', '')+'_english.pkl' 
 
