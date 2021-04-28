@@ -201,7 +201,8 @@ for step, batch in enumerate(train_loader):
     b_input_mask = data[1].squeeze()
     #b_labels = batch[1][:,0].squeeze()
     b_labels = batch[1].squeeze()
-    print(b_labels)
+    #print(b_labels)
+    #print(b_input_ids)
     b_input_ids = b_input_ids.to(device, dtype=torch.long)
     b_input_mask = b_input_mask.to(device, dtype=torch.long)
     b_labels = b_labels.to(device, dtype=torch.long)
@@ -210,8 +211,11 @@ for step, batch in enumerate(train_loader):
     #Multitask::::::!!!!!!!
     loss = model(input_id=b_input_ids, token_type_id=None, mask_id=b_input_mask,labels=b_labels)
     logits_task1, logits_task2 = model(input_id=b_input_ids, token_type_id=None, mask_id=b_input_mask)
-    break
+    loss.backward()
+    optimizer.step()
+    #break
 
+print('finished')
 #%% 
 x = torch.randn(10, 5)
 target = torch.randint(0, 5, (10,))

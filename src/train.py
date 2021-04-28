@@ -27,6 +27,7 @@ parser.add_argument('--epochs', type = int, default = 20, help = 'number of epoc
 parser.add_argument('--schedule', type = str, default = 'linear', help = 'schedule (linear or constant)')
 parser.add_argument('--lr', type = float, default = 2e-5, help = 'learning rate')
 parser.add_argument('--model_path', type = str, default = '../models/bert_test.pt', help = 'path to save trained model (e.g. ../models/bert_test.pt)')
+parser.add_argument('--learnable_parameter', action = 'store_true', default = False, help = 'learnable parameter when multitasking')
 
 args = parser.parse_args()
 #print(args)
@@ -60,6 +61,7 @@ learning_rate = args.lr
 model_path=args.model_path
 
 balance_metwo = args.balance_metwo
+learnable_parameter = args.learnable_parameter
 #%% 
 train_loader = DataLoader(
     dataset=datasets.exist_2021(train_path, 
@@ -90,6 +92,8 @@ elif task==2:
     model=create_model(basenet, device, num_labels=6)
 elif task=='multitask':
     model=create_model(basenet, device, multitask=True)
+elif task=='multitask' and learnable_parameter:
+    model=create_model(basenet, device, multitask=True, learnable_parameter=True)
 else:
     print("Please enter a valid task")
 
