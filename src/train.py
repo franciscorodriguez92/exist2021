@@ -28,6 +28,7 @@ parser.add_argument('--schedule', type = str, default = 'linear', help = 'schedu
 parser.add_argument('--lr', type = float, default = 2e-5, help = 'learning rate')
 parser.add_argument('--model_path', type = str, default = '../models/bert_test.pt', help = 'path to save trained model (e.g. ../models/bert_test.pt)')
 parser.add_argument('--learnable_parameter', action = 'store_true', default = False, help = 'learnable parameter when multitasking')
+parser.add_argument('--focal_loss', action = 'store_true', default = False, help = 'focal_loss')
 
 args = parser.parse_args()
 #print(args)
@@ -62,6 +63,7 @@ model_path=args.model_path
 
 balance_metwo = args.balance_metwo
 learnable_parameter = args.learnable_parameter
+focal_loss = args.focal_loss
 #%% 
 train_loader = DataLoader(
     dataset=datasets.exist_2021(train_path, 
@@ -91,9 +93,9 @@ if task==1:
 elif task==2:
     model=create_model(basenet, device, num_labels=6)
 elif task=='multitask':
-    model=create_model(basenet, device, multitask=True)
+    model=create_model(basenet, device, multitask=True, focal_loss=focal_loss)
 elif task=='multitask' and learnable_parameter:
-    model=create_model(basenet, device, multitask=True, learnable_parameter=True)
+    model=create_model(basenet, device, multitask=True, learnable_parameter=True, focal_loss=focal_loss)
 else:
     print("Please enter a valid task")
 
