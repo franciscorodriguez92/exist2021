@@ -103,7 +103,12 @@ def evaluate(model, dataloader, device, task):
         #print("PREDICTIONS:::::: ", (predictions))
         test_acc_task2 = accuracy_score(true_labels_task2, predictions_task2)
         test_f_score_task2 = f1_score(true_labels_task2, predictions_task2, average='macro')
-        print(f'\n\n Results Task 1 --- Test loss: {test_loss/nb_test_steps}, Test acc: {test_acc_task2}, Test f1: {test_f_score_task2}')
+        print(f'\n\n Results Task 2 --- Test loss: {test_loss/nb_test_steps}, Test acc: {test_acc_task2}, Test f1: {test_f_score_task2}')
+        #Task1 evaluated using task2 model
+        predictions_task1_ = [1 if i!=0 else 0 for i in predictions_task2]
+        test_acc_task1_ = accuracy_score(true_labels, predictions_task1_)
+        test_f_score_task1_ = f1_score(true_labels, predictions_task1_, average='macro')
+        print(f'\n\n Results Task 1 (task2 model) --- Test loss: {test_loss/nb_test_steps}, Test acc: {test_acc_task1_}, Test f1: {test_f_score_task1_}')
     else:
         for i in range(len(true_labels)):
             pred_=np.argmax(probas[i], axis=1)
