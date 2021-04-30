@@ -120,12 +120,13 @@ def evaluate(model, dataloader, device, task):
         test_acc = accuracy_score(true_labels, predictions)
         test_f_score = f1_score(true_labels, predictions, average='macro')
         print(f'\n\nTest loss: {test_loss/nb_test_steps}, Test acc: {test_acc}, Test f1: {test_f_score}')       
-    #return test_loss/nb_test_steps, [test_acc, test_f_score]
+    if task == 'multitask':
+        return {'loss': test_loss/nb_test_steps, 'acc': test_acc_task2, 'macro_f1': test_f_score_task2}
     return {'loss': test_loss/nb_test_steps, 'acc': test_acc, 'macro_f1': test_f_score}
 
 def train(model, optimizer,
                 train_loader, validation_loader, epochs, model_path, scheduler=None,
-                monitor="f1", early_stopping_tolerance=5, task=1):
+                monitor="f1", early_stopping_tolerance=8, task=1):
     if task != 'multitask':
         task = 0 if task==1 else 1
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
