@@ -21,7 +21,7 @@ def create_model(model_name, device, num_labels=2, multitask=False, learnable_pa
     elif model_name == "bert" and not multitask:
         bert_model = BertForSequenceClassification.from_pretrained(bert_name, num_labels=num_labels)
     #bert_tokenizer = BertTokenizer.from_pretrained(bert_name)
-    elif multitask:
+    elif multitask and not learnable_parameter:
         bert_model = BERT_based_classifier_multitask(basenet=model_name, focal_loss=focal_loss)
     elif multitask and learnable_parameter:
         bert_model = BERT_based_classifier_multitask_alpha_parameter(basenet=model_name, focal_loss=focal_loss)

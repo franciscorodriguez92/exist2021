@@ -92,13 +92,12 @@ if task==1:
     model=create_model(basenet, device)
 elif task==2:
     model=create_model(basenet, device, num_labels=6)
-elif task=='multitask':
+elif task=='multitask' and not learnable_parameter:
     model=create_model(basenet, device, multitask=True, focal_loss=focal_loss)
 elif task=='multitask' and learnable_parameter:
     model=create_model(basenet, device, multitask=True, learnable_parameter=True, focal_loss=focal_loss)
 else:
     print("Please enter a valid task")
-
 #%%
 optimizer = AdamW(model.parameters(), lr=learning_rate)
 num_training_steps = epochs * len(train_loader)
