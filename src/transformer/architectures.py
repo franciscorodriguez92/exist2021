@@ -2,7 +2,7 @@ import transformers
 from transformers import BertForSequenceClassification, RobertaForSequenceClassification, AutoModelForSequenceClassification
 import torch
 from torch.nn import CrossEntropyLoss
-from transformers import BertModel, RobertaModel
+from transformers import BertModel, RobertaModel, AutoModel
 
 def create_model(model_name, device, num_labels=2, multitask=False, learnable_parameter=False, focal_loss=False):
     # if model_name not in AVAILABLE_MODELS:
@@ -73,6 +73,11 @@ class BERT_based_classifier_multitask_alpha_parameter(torch.nn.Module):
 			self.encoder = RobertaModel.from_pretrained('xlm-roberta-base',
 													  output_hidden_states = False 
 													)
+		elif basenet == 'roberta_twitter':
+			print("Base architecture: twitter-xlm-roberta-base")
+			self.encoder = AutoModel.from_pretrained('cardiffnlp/twitter-xlm-roberta-base',
+													  output_hidden_states = False 
+													)
 		if bert_freeze:
 			print("Freezing BERT!")
 			# freeze bert so that is is not finetuned
@@ -121,6 +126,11 @@ class BERT_based_classifier_multitask(torch.nn.Module):
 		elif basenet == 'roberta':
 			print("Base architecture: xlm-roberta-base")
 			self.encoder = RobertaModel.from_pretrained('xlm-roberta-base',
+													  output_hidden_states = False 
+													)
+		elif basenet == 'roberta_twitter':
+			print("Base architecture: twitter-xlm-roberta-base")
+			self.encoder = AutoModel.from_pretrained('cardiffnlp/twitter-xlm-roberta-base',
 													  output_hidden_states = False 
 													)
 		if bert_freeze:
