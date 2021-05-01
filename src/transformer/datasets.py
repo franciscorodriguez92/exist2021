@@ -125,6 +125,9 @@ class exist_2021(torch.utils.data.Dataset):
 		if basenet == 'roberta':
 			print("Tokenizer: xlm-roberta-base\n")
 			self.token = AutoTokenizer.from_pretrained('xlm-roberta-base')
+		if basenet == 'roberta_twitter':
+			print("Tokenizer: twitter-xlm-roberta-base\n")
+			self.token = AutoTokenizer.from_pretrained("cardiffnlp/twitter-xlm-roberta-base")
 		# elif basenet == 'ernie':
 		# 	print("Tokenizer: ernie-2.0-en\n")
 		# 	self.token = AutoTokenizer.from_pretrained("nghuyong/ernie-2.0-en")

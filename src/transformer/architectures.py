@@ -1,5 +1,5 @@
 import transformers
-from transformers import BertForSequenceClassification, RobertaForSequenceClassification
+from transformers import BertForSequenceClassification, RobertaForSequenceClassification, AutoModelForSequenceClassification
 import torch
 from torch.nn import CrossEntropyLoss
 from transformers import BertModel, RobertaModel
@@ -14,13 +14,17 @@ def create_model(model_name, device, num_labels=2, multitask=False, learnable_pa
         bert_name = "bert-base-multilingual-cased"
     elif model_name == "roberta":
         bert_name = "xlm-roberta-base"
+    elif model_name == "roberta_twitter":
+        bert_name = "cardiffnlp/twitter-xlm-roberta-base"
 
     print(f"Using {bert_name}")
     if model_name == "roberta" and not multitask:
         bert_model = RobertaForSequenceClassification.from_pretrained(bert_name, num_labels=num_labels)
     elif model_name == "bert" and not multitask:
         bert_model = BertForSequenceClassification.from_pretrained(bert_name, num_labels=num_labels)
-    #bert_tokenizer = BertTokenizer.from_pretrained(bert_name)
+    elif model_name == "roberta_twitter" and not multitask:
+        bert_model = AutoModelForSequenceClassification.from_pretrained(bert_name, num_labels=num_labels)   
+	#bert_tokenizer = BertTokenizer.from_pretrained(bert_name)
     elif multitask and not learnable_parameter:
         bert_model = BERT_based_classifier_multitask(basenet=model_name, focal_loss=focal_loss)
     elif multitask and learnable_parameter:
