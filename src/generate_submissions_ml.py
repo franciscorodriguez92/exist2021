@@ -64,9 +64,9 @@ if language == "both":
     df_test_es['category']=y_pred_test
     df_test_en['category']=y_pred_test_en
     df = pd.concat([df_test_es, df_test_en])
-    df=df[['id', 'test_case', 'category']]
+    df=df[['test_case', 'id', 'category']]
     df.to_csv(output_path.replace('.tsv', '')+'_'+str(task)+'_ml.tsv' , sep="\t", index=False)
 else:
     df_test['category']=y_pred_test
-    df=df[['id', 'test_case', 'category']]
+    df=df[['test_case', 'id', 'category']]
     df.to_csv(output_path.replace('.tsv', '')+'_'+str(language)+'_'+str(task)+'_ml.tsv' , sep="\t", index=False)

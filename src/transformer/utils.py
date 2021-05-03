@@ -88,15 +88,15 @@ def generate_submission(model_path, basenet, device, test_path=None, output_path
     df['predictions'] = predictions
     if task==1:
         df['category']=df['predictions'].map({ 0: 'non-sexist', 1: 'sexist'})
-        df=df[['id', 'test_case', 'category']]
+        df=df[['test_case', 'id', 'category']]
         df.to_csv(output_path, sep="\t", index=False)
     elif task==2:
         df['category']=df['predictions'].map({0: 'non-sexist', 1: 'ideological-inequality', 2: 'stereotyping-dominance', 3: 'objectification', 4: 'sexual-violence', 5: 'misogyny-non-sexual-violence'})
-        df=df[['id', 'test_case', 'category']]
+        df=df[['test_case', 'id', 'category']]
         df.to_csv(output_path, sep="\t", index=False)
     elif task=='multitask':
         df['category']=df['predictions'].map({0: 'non-sexist', 1: 'sexist'})
-        df=df[['id', 'test_case', 'category']]
+        df=df[['test_case', 'id', 'category']]
         df.to_csv(output_path, sep="\t", index=False)
         df['category']=predictions_task2
         df['category']=df['category'].map({0: 'non-sexist', 1: 'ideological-inequality', 2: 'stereotyping-dominance', 3: 'objectification', 4: 'sexual-violence', 5: 'misogyny-non-sexual-violence'})
