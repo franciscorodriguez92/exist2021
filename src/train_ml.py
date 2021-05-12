@@ -76,13 +76,13 @@ if language == "both":
 #%%
 
 if language=="both":
-    df_train_es = utils.read_file(train_path, "es", sample, text_cleaner)
-    df_val_es = utils.read_file(val_path, "es", sample, text_cleaner)
-    df_train_en = utils.read_file(train_path, "en", sample, text_cleaner)
-    df_val_en = utils.read_file(val_path, "en", sample, text_cleaner)
+    df_train_es = utils.read_file(train_path, "es", sample=sample, text_cleaner=text_cleaner)
+    df_val_es = utils.read_file(val_path, "es", sample=sample, text_cleaner=text_cleaner)
+    df_train_en = utils.read_file(train_path, "en", sample=sample, text_cleaner=text_cleaner)
+    df_val_en = utils.read_file(val_path, "en", sample=sample, text_cleaner=text_cleaner)
 else:
-    df_train = utils.read_file(train_path, language, sample, text_cleaner)
-    df_val = utils.read_file(val_path, language, sample, text_cleaner)
+    df_train = utils.read_file(train_path, language, sample=sample, text_cleaner=text_cleaner)
+    df_val = utils.read_file(val_path, language, sample=sample, text_cleaner=text_cleaner)
 
 #%% Read files
 #path = os.getcwd()

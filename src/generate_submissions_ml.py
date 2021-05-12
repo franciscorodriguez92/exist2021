@@ -43,10 +43,10 @@ if language == "both":
 
 #%%
 if language=="both":
-    df_test_es = utils.read_file(test_path, "es", sample, text_cleaner)
-    df_test_en = utils.read_file(test_path, "en", sample, text_cleaner)
+    df_test_es = utils.read_file(test_path, "es", sample=sample, text_cleaner=text_cleaner)
+    df_test_en = utils.read_file(test_path, "en", sample=sample, text_cleaner=text_cleaner)
 else:
-    df_test = utils.read_file(test_path, language, sample, text_cleaner)
+    df_test = utils.read_file(test_path, language, sample=sample, text_cleaner=text_cleaner)
 
 
 #%%
@@ -68,5 +68,5 @@ if language == "both":
     df.to_csv(output_path.replace('.tsv', '')+'_'+str(task)+'_ml.tsv' , sep="\t", index=False)
 else:
     df_test['category']=y_pred_test
-    df=df[['test_case', 'id', 'category']]
+    df=df_test[['test_case', 'id', 'category']]
     df.to_csv(output_path.replace('.tsv', '')+'_'+str(language)+'_'+str(task)+'_ml.tsv' , sep="\t", index=False)
