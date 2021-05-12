@@ -49,9 +49,9 @@ def read_file(filename, language, sample, concat_metwo=False, text_cleaner=False
 	
 	if text_cleaner:
 		preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
-                       filter_urls=True, convert_hastags=True, lowercase=True, 
-                       replace_exclamation=True, replace_interrogation=True, 
-                       remove_accents=True, remove_punctuation=True)
+                           filter_urls=True, lowercase=True, 
+                           replace_exclamation=True, replace_interrogation=True, 
+                           remove_punctuation=True)
 		df['text'] = df['text'].apply(lambda row: preprocessor(row))
 	return df
 
